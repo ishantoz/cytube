@@ -1,0 +1,21 @@
+---
+description: CyTube project entrypoint and file-backed lifecycle
+alwaysApply: true
+---
+
+Read `AGENTS.md`. Bootstrap only:
+
+- `blueprint/context/project-overview.md`
+- `blueprint/context/current-feature.md`
+- `blueprint/context/session-handoff.md`
+
+Inspect git state, then load only the active `Context manifest`. Canonical rules
+live in `.agents/rules/*.md`; canonical skills live in `.agents/skills/`.
+
+Work process: `status -> feature/fix -> approve spec -> implement -> check -> complete`.
+Do not implement non-trivial work without an approved spec.
+
+Pre-build: run `/prototype` before the first real UI feature.
+
+This repo has no test framework. The gate is `./.agents/check-baseline.sh`, which
+fails only on NEW errors. Repo starts green at onboarding.

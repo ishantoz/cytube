@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "project": "cytube",
+  "mode": "committed",
+  "defaultScope": "src",
+  "optInScopes": [
+    "prisma"
+  ],
+  "canonicalSkills": ".agents/skills",
+  "skillAdapters": [
+    ".claude/skills",
+    ".cursor/skills"
+  ],
+  "canonicalRules": ".agents/rules",
+  "cursorRules": ".cursor/rules",
+  "bootstrapContext": [
+    "blueprint/context/project-overview.md",
+    "blueprint/context/current-feature.md",
+    "blueprint/context/session-handoff.md"
+  ],
+  "contextLineBudgets": {
+    "projectOverview": 180,
+    "sessionHandoff": 80,
+    "currentFeature": 350
+  },
+  "backendPaths": [
+    "src/backend",
+    "prisma"
+  ],
+  "backendTestCommandTemplate": null,
+  "testFramework": null,
+  "verifyCommands": [
+    "./.agents/check-baseline.sh",
+    "pnpm build"
+  ],
+  "baseline": "blueprint/context/adoption-baseline.md",
+  "baselineGate": {
+    "script": ".agents/check-baseline.sh",
+    "state": [
+      "blueprint/.state/tsc-baseline.txt",
+      "blueprint/.state/eslint-baseline.txt"
+    ],
+    "policy": "no-new-errors",
+    "rewriteRequiresApproval": true
+  }
+}

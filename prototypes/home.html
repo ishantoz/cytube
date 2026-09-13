@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CyTube — Channels</title>
+    <link rel="stylesheet" href="./theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
+    />
+    <style>
+      .top {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        height: var(--header);
+        padding: 0 var(--space-5);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+      .mark {
+        font-family: var(--font-display);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+      .mark span {
+        color: var(--accent);
+      }
+      .search {
+        flex: 1;
+        max-width: 28rem;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: var(--space-2) var(--space-4);
+      }
+      .search::placeholder {
+        color: var(--faint);
+      }
+      .top-actions {
+        margin-left: auto;
+        display: flex;
+        gap: var(--space-2);
+      }
+      .btn {
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: var(--space-2) var(--space-4);
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-ink);
+      }
+      .wrap {
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: var(--space-6) var(--space-5);
+      }
+      .head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: var(--space-5);
+      }
+      h1 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        margin: 0;
+      }
+      .hint {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+        gap: var(--space-4);
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+      .thumb {
+        height: 8.5rem;
+        background: linear-gradient(135deg, var(--player), var(--surface-2));
+        position: relative;
+      }
+      .live {
+        position: absolute;
+        top: var(--space-3);
+        left: var(--space-3);
+        background: var(--accent);
+        color: var(--accent-ink);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 0.15rem var(--space-2);
+        border-radius: 999px;
+      }
+      .viewers {
+        position: absolute;
+        right: var(--space-3);
+        bottom: var(--space-3);
+        background: rgb(0 0 0 / 0.65);
+        color: var(--text);
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 0.15rem var(--space-2);
+        border-radius: var(--radius);
+      }
+      .body {
+        padding: var(--space-4);
+      }
+      .name {
+        font-family: var(--font-display);
+        font-weight: 600;
+        margin: 0 0 var(--space-1);
+      }
+      .now {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .empty-state {
+        display: none;
+        text-align: center;
+        padding: var(--space-6);
+        background: var(--surface);
+        border: 1px dashed var(--border);
+        border-radius: var(--radius-lg);
+        color: var(--muted);
+      }
+      .empty-state strong {
+        display: block;
+        font-family: var(--font-display);
+        color: var(--text);
+        font-size: 1.15rem;
+        margin-bottom: var(--space-2);
+      }
+      body.is-empty .grid {
+        display: none;
+      }
+      body.is-empty .empty-state {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <a class="mark" href="./index.html">Cy<span>Tube</span></a>
+      <input class="search" type="search" placeholder="Search channels" value="" />
+      <div class="top-actions">
+        <button class="btn" type="button" id="toggle-empty">Empty state</button>
+        <button class="btn btn-primary" type="button">Create room</button>
+      </div>
+    </header>
+    <main class="wrap">
+      <div class="head">
+        <h1>Public rooms</h1>
+        <p class="hint">Join a channel. Video stays on the room page.</p>
+      </div>
+      <div class="grid">
+        <a class="card" href="./room.html">
+          <div class="thumb">
+            <span class="live">LIVE</span>
+            <span class="viewers">128</span>
+          </div>
+          <div class="body">
+            <p class="name">Friday Night Anime</p>
+            <p class="now">Now: Steins;Gate — 23 · The Story of the End</p>
+          </div>
+        </a>
+        <a class="card" href="./room.html">
+          <div class="thumb">
+            <span class="live">LIVE</span>
+            <span class="viewers">41</span>
+          </div>
+          <div class="body">
+            <p class="name">Lo-fi Study</p>
+            <p class="now">Now: rainy morning mix — 3:12:08</p>
+          </div>
+        </a>
+        <a class="card" href="./room.html">
+          <div class="thumb">
+            <span class="viewers">9</span>
+          </div>
+          <div class="body">
+            <p class="name">GDQ Speedruns</p>
+            <p class="now">Queue paused · next in 4m</p>
+          </div>
+        </a>
+        <a class="card" href="./room.html">
+          <div class="thumb">
+            <span class="live">LIVE</span>
+            <span class="viewers">76</span>
+          </div>
+          <div class="body">
+            <p class="name">Concert night</p>
+            <p class="now">Now: RADWIMPS live at Yokohama</p>
+          </div>
+        </a>
+      </div>
+      <div class="empty-state">
+        <strong>No public rooms yet</strong>
+        <p>Create one, or wait for a channel owner to open a queue.</p>
+      </div>
+    </main>
+    <script>
+      const empty = new URLSearchParams(location.search).has("empty");
+      if (empty) document.body.classList.add("is-empty");
+      document.getElementById("toggle-empty").addEventListener("click", () => {
+        document.body.classList.toggle("is-empty");
+      });
+    </script>
+  </body>
+</html>

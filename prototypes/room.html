@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CyTube — Friday Night Anime</title>
+    <link rel="stylesheet" href="./theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: var(--header) 1fr;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        padding: 0 var(--space-4);
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+      .mark {
+        font-family: var(--font-display);
+        font-weight: 700;
+      }
+      .mark span {
+        color: var(--accent);
+      }
+      .channel {
+        font-family: var(--font-display);
+        font-weight: 600;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .dot {
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        background: var(--live);
+        border-radius: 999px;
+        margin-right: var(--space-1);
+      }
+      .top-actions {
+        margin-left: auto;
+        display: flex;
+        gap: var(--space-2);
+      }
+      .btn {
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: var(--space-2) var(--space-3);
+        cursor: pointer;
+      }
+      .stage {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--sidebar);
+        min-height: 0;
+      }
+      .player-col {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: var(--player);
+      }
+      .player {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: radial-gradient(ellipse at center, #1a1020 0%, var(--player) 70%);
+      }
+      .player-title {
+        position: absolute;
+        left: var(--space-4);
+        bottom: var(--space-5);
+        right: var(--space-4);
+      }
+      .player-title strong {
+        display: block;
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+      }
+      .player-title span {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .bar {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+      }
+      .progress {
+        flex: 1;
+        height: 4px;
+        background: var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .progress i {
+        display: block;
+        width: 42%;
+        height: 100%;
+        background: var(--accent);
+      }
+      .time {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .side {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        border-left: 1px solid var(--border);
+        background: var(--bg);
+        min-height: 0;
+      }
+      .panel-h {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--space-3) var(--space-4);
+        border-bottom: 1px solid var(--border);
+        font-size: 0.8rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .queue {
+        overflow: auto;
+        padding: var(--space-2);
+      }
+      .item {
+        display: grid;
+        grid-template-columns: 3.5rem 1fr auto;
+        gap: var(--space-3);
+        padding: var(--space-2);
+        border-radius: var(--radius);
+      }
+      .item.now {
+        background: var(--surface);
+        border: 1px solid var(--border-strong);
+      }
+      .thumb {
+        width: 3.5rem;
+        height: 2.5rem;
+        background: var(--surface-2);
+        border-radius: 4px;
+      }
+      .item p {
+        margin: 0;
+        font-size: 0.85rem;
+      }
+      .item em {
+        display: block;
+        font-style: normal;
+        color: var(--muted);
+        font-size: 0.75rem;
+      }
+      .dur {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--faint);
+      }
+      .chat {
+        display: flex;
+        flex-direction: column;
+        min-height: 16rem;
+        border-top: 1px solid var(--border);
+        background: var(--surface);
+      }
+      .msgs {
+        flex: 1;
+        overflow: auto;
+        padding: var(--space-3) var(--space-4);
+      }
+      .msg {
+        margin: 0 0 var(--space-2);
+        font-size: 0.9rem;
+      }
+      .msg .who {
+        font-weight: 600;
+        margin-right: var(--space-2);
+      }
+      .msg.sys {
+        color: var(--faint);
+        font-size: 0.8rem;
+      }
+      .owner {
+        color: var(--warn);
+      }
+      .composer {
+        display: flex;
+        gap: var(--space-2);
+        padding: var(--space-3);
+        border-top: 1px solid var(--border);
+      }
+      .composer input {
+        flex: 1;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: var(--radius);
+        padding: var(--space-2) var(--space-3);
+      }
+      .composer button {
+        background: var(--accent);
+        color: var(--accent-ink);
+        border: 0;
+        border-radius: var(--radius);
+        padding: var(--space-2) var(--space-4);
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <a class="mark" href="./home.html">Cy<span>Tube</span></a>
+      <div>
+        <div class="channel">Friday Night Anime</div>
+        <div class="meta"><span class="dot"></span>128 watching · owner: nico</div>
+      </div>
+      <div class="top-actions">
+        <button class="btn" type="button">Queue</button>
+        <a class="btn" href="./home.html">Leave</a>
+      </div>
+    </header>
+    <div class="stage">
+      <section class="player-col">
+        <div class="player">
+          <div class="player-title">
+            <strong>Steins;Gate — 23 · The Story of the End</strong>
+            <span>Playing · synced · 18:04 remaining</span>
+          </div>
+        </div>
+        <div class="bar">
+          <button class="btn" type="button">Pause</button>
+          <div class="progress" aria-hidden="true"><i></i></div>
+          <span class="time">14:21 / 24:12</span>
+        </div>
+      </section>
+      <aside class="side">
+        <div class="panel-h">
+          <span>Playlist</span>
+          <span>4 in queue</span>
+        </div>
+        <div class="queue">
+          <div class="item now">
+            <div class="thumb"></div>
+            <p>Steins;Gate 23<em>now playing</em></p>
+            <span class="dur">24:12</span>
+          </div>
+          <div class="item">
+            <div class="thumb"></div>
+            <p>Steins;Gate 24<em>nico added</em></p>
+            <span class="dur">23:48</span>
+          </div>
+          <div class="item">
+            <div class="thumb"></div>
+            <p>Opening 2 — Hacking to the Gate<em>maya added</em></p>
+            <span class="dur">4:02</span>
+          </div>
+          <div class="item">
+            <div class="thumb"></div>
+            <p>Ova: Egoistic Poriomania<em>queued</em></p>
+            <span class="dur">23:11</span>
+          </div>
+        </div>
+        <div class="chat">
+          <div class="panel-h"><span>Chat</span><span>read-only in 6b</span></div>
+          <div class="msgs">
+            <p class="msg sys">maya joined</p>
+            <p class="msg"><span class="who owner">nico</span>starting ep 23, don’t skip OP</p>
+            <p class="msg"><span class="who">maya</span>wait for me I’m 4s behind</p>
+            <p class="msg"><span class="who">ren</span>this ending still hits</p>
+          </div>
+          <form class="composer" onsubmit="return false">
+            <input type="text" placeholder="Message #friday-night-anime" />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </aside>
+    </div>
+  </body>
+</html>

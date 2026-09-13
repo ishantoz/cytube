@@ -1,0 +1,12 @@
+---
+description: CyTube web frontend — Next.js pages, components, API client
+globs: web/**
+alwaysApply: false
+---
+
+Read `.agents/rules/web-frontend.md` and `.agents/web-agent.md`.
+
+- Pages in `web/src/app/` stay thin; UI in `web/src/components/`.
+- Backend calls only through `web/src/lib/api.ts`.
+- Tailwind CSS 4 via `globals.css` `@theme`.
+- Check `prototypes/theme.css` if `/prototype` has run.
