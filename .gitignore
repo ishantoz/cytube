@@ -50,3 +50,14 @@ next-env.d.ts
 
 # Testing
 coverage/
+
+# Local media downloads
+downloads/
+*.mp4
+*.webm
+*.m4a
+*.mkv
+
+downloads/
+
+prototypes/

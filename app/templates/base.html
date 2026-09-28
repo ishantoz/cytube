@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ label }} — CyTube</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@4.0.0/dist/htmx.min.js"></script>
+  <style>
+    html { font-family: "Source Sans 3", ui-sans-serif, system-ui, sans-serif; }
+    .htmx-indicator { display: none; }
+    .htmx-request .htmx-indicator { display: inline; }
+    .htmx-request .htmx-label { display: none; }
+    #download-stack { pointer-events: none; }
+    #download-stack > * { pointer-events: auto; }
+  </style>
+</head>
+<body class="bg-white text-gray-800 min-h-screen flex flex-col">
+  <header class="border-b border-gray-200">
+    <div class="max-w-3xl mx-auto px-4 py-5 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
+      <a href="/youtube" class="text-xl font-semibold text-gray-900">CyTube</a>
+      <nav class="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+        {% for key, spec in platforms.items() %}
+        <a
+          href="/{{ key }}"
+          class="{% if key == platform %}text-gray-900 font-semibold border-b-2 border-gray-900 pb-0.5{% else %}text-gray-600 hover:text-gray-900{% endif %}"
+        >{{ spec.label }}</a>
+        {% endfor %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="border-t border-gray-200 mt-auto">
+    <div class="max-w-3xl mx-auto px-4 py-8 text-sm text-gray-500">
+      <p class="font-semibold text-gray-800">CyTube</p>
+      <p class="mt-2">Public {{ label }} links only. Private or login-walled posts are not supported.</p>
+      <p class="mt-1">Downloads are processed in a temp folder, streamed to your browser, then deleted from the server.</p>
+      <nav class="mt-4 flex flex-wrap gap-x-4 gap-y-1">
+        {% for key, spec in platforms.items() %}
+        <a href="/{{ key }}" class="hover:text-gray-800">{{ spec.label }}</a>
+        {% endfor %}
+      </nav>
+    </div>
+  </footer>
+
+  <div
+    id="download-stack"
+    class="fixed bottom-4 right-4 z-50 w-[min(22rem,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto flex flex-col gap-2"
+    aria-live="polite"
+  ></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
