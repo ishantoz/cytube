@@ -1,12 +1,11 @@
 ---
-description: CyTube API backend — Hono routes, Prisma 7, migrations
-globs: backend/**
+description: CyTube API backend — FastAPI job routes, yt-dlp extract, download jobs
+globs: app/backend/**/*.py,app/logic/**/*.py,app/main.py
 alwaysApply: false
 ---
 
 Read `.agents/rules/api-backend.md` and `.agents/api-agent.md`.
 
-- Routes in `backend/src/routes/`; Prisma via `backend/src/lib/prisma.ts`.
-- Import client from `backend/src/generated/prisma/client.js`.
-- Schema changes need `pnpm db:migrate` + `pnpm db:generate`.
-- DB URL in `backend/prisma.config.ts`.
+- JSON inspect and jobs in `app/backend/` at `/api`; extract/jobs in `app/logic/`.
+- `app/main.py` includes backend routers before web `GET /{platform}`.
+- Public hosts only. Verify with curl on `:8000`.

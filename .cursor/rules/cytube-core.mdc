@@ -18,4 +18,5 @@ Do not implement non-trivial work without an approved spec.
 Pre-build: run `/prototype` before the first real UI feature.
 
 This repo has no test framework. The gate is `./.agents/check-baseline.sh`, which
-fails only on NEW errors. Repo starts green at onboarding.
+fails only on NEW errors. Repo starts green at onboarding. Python analysis uses
+`.venv` via `pyrightconfig.json`.

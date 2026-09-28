@@ -1,92 +1,85 @@
 # CyTube Project Overview
 
 > Generated from `blueprint/project-plan.md` and `blueprint/build-plan.md`.
-> Regenerated 2026-09-01 after 6a archive and prototype lock.
+> Regenerated 2026-09-29 for the local desktop shell.
 
-Plan source fingerprint: cytube-2026-09-01-proto
+Plan source fingerprint: cytube-2026-09-29-desktop-shell
 
 ## Purpose and users
 
-Synchronized video rooms. Viewers join channels, watch together, chat, and
-share playlists. Channel owners manage rooms and the queue. Guests are future.
+Public-URL download portal. Users paste a public YouTube, Instagram, Facebook,
+TikTok, Dailymotion, or Bilibili link, list formats, and download
+video+audio / video only / audio only. Private or login-walled posts are out
+of scope.
+
+Local operators can launch a desktop shell that starts the same daemon, shows
+the portal in a window, and keeps the web UI at `http://127.0.0.1:8000`.
 
 ## Default scope
 
-Single pnpm package at the repo root:
+Single Python package at the repo root:
 
-- UI: `src/pages/` (Astro stub until 6b)
-- API: `src/backend/` modules, mounted at `/api` via Astro catch-all
-- Schema: `prisma/schema.prisma` — `HealthCheck` probe table
-- Look: `prototypes/theme.css` + `home.html` / `room.html`
+- UI: `app/web/templates/` + `app/web/static/app.js`
+- Pages: `app/web/routes.py`
+- API: `app/backend/` inspect + job JSON under `/api`
+- Extract / jobs: `app/logic/`
+- Desktop: `app/desktop.py` (pywebview + uvicorn subprocess)
 - Agent workflow: `blueprint/`, `.agents/`
 
 ## Stack
 
-**Today:** one Cloudflare Worker — Astro 7 SSR + `@astrojs/cloudflare` 14,
-Hono at `/api`, D1 (`HealthCheck`), KV (`SESSION` + `KV`), R2 `ASSETS`.
+**Today:** FastAPI + Jinja2 + Flowbite/Tailwind CDN, uv, uvicorn `:8000`.
+yt-dlp with curl-cffi Firefox impersonation where needed.
+
+**Desktop:** pywebview window on the existing pages; same `app/` package;
+`uv run cytube`.
 
 ## Architecture
 
 ```
-cytube.ishanto.com/              production pages
-cytube.ishanto.com/api/*         Hono
-cytube-dev.ishanto.com/          `--env dev` (own D1/R2/KV)
-GET /api/health                  `{ status, database, storage, kv }`
+http://127.0.0.1:8000/           307 → /youtube
+/{platform}                      inspect form (HTML)
+POST /api/{platform}/inspect     JSON formats
+POST /api/{platform}/jobs        start download
+GET  /api/jobs/{id}/events       SSE
+GET  /api/jobs/{id}/file         stream + delete
+POST /api/jobs/{id}/cancel       stop job
+desktop `uv run cytube`          start/reuse daemon + native window
 ```
-
-Production custom domain is `cytube.ishanto.com`. Preview Worker
-`cytube-dev` uses `cytube-dev.ishanto.com` with separate D1 `cytube-dev`,
-R2 `cytube-dev-assets`, and KV namespaces.
 
 ## Data model
 
-### HealthCheck
-
-- `kind` (string, id) — probe name (`database` / `storage` / `kv`)
-- `checkedAt` (string) — last successful probe time
-- table `health_checks`
-
-No users/channels/playlist/chat until a later feature adds them.
+No database. Jobs are in-memory with a temp directory per download.
 
 ## Features
 
-Shipped: Blueprint loop, 6a combined Worker (Astro + Hono health).
+Shipped: public multi-platform inspect + concurrent downloads with
+confirm-to-cancel and a bottom-right progress stack.
 
-1. **6. Same-origin Astro** — 6a done; next leaf is **6b** UI shell.
-2. **6b. Astro UI** — port `prototypes/theme.css`, build pages from mockups.
-3. **6c. KV sessions** — `SESSION` + a real `KV` read/write.
-4. **6d. Domain cutover** — `cytube.ishanto.com`.
-5. **Chat / playlist / playback / auth / WebSocket / OPFS** — later.
+Shipped: **7** local desktop shell (daemon + window + exposed local URL).
+
+Later (own specs): rooms, chat, playlist, auth, WebSocket, OPFS, leftover
+Worker items 6b–6d.
 
 ## UI / UX
 
-Locked in `prototypes/`. Dark media-room: player primary, chat and playlist
-secondary. Accent rose `#e11d48` for live/now-playing.
-
-- `/` — channel directory (`prototypes/home.html`)
-- `/r/...` (or equivalent) — watch room (`prototypes/room.html`)
-- `/api/health` — Hono health
+Light published-site header/footer. Platform nav. Download cards stack at
+the bottom right. The desktop window is that same portal; the window title
+includes the local URL.
 
 ## Deployment
 
-Cloudflare Workers, Wrangler 4. Production: D1 `cytube`, R2 `cytube-assets`.
-Preview (`--env dev`): D1 `cytube-dev`, R2 `cytube-dev-assets`. Health:
-`GET /api/health`. Dev: `pnpm dev` (workerd :8787). No test framework.
+- Dev server: `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
+- Desktop: `uv run cytube` — bind `127.0.0.1:8000` or reuse if already up;
+  quit stops a daemon this process started
+- Not a Cloudflare Worker
 
 ## Engineering invariants
 
-- pnpm 11; gate `./.agents/check-baseline.sh`
-- No framework scaffolder (`create-cloudflare` / `create astro`)
-- Bindings: `import { env } from "cloudflare:workers"`
-- Hono only through Astro `/api` catch-all
-- Prisma client: `pnpm db:generate` → `src/backend/generated/prisma`
-- Real-time and OPFS need their own specs
-
-## Open questions / gaps
-
-- `cytube.ishanto.com` vs leftover `api.cytube.ishanto.com` DNS: production
-  Worker now targets `cytube.ishanto.com`; preview is `cytube-dev.ishanto.com`.
-- Auth/WebSocket/OPFS/tests still open in the project plan.
+- uv; gate `./.agents/check-baseline.sh`
+- No framework scaffolder
+- Public hosts only; localhost bind for the daemon
+- Pylance uses `.venv` (`pyrightconfig.json`)
 
 ## Lazy context routing
 

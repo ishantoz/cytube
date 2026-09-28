@@ -5,84 +5,70 @@
 
 ## Purpose
 
-CyTube is a modern synchronized video-room application. Users join public or
-private channels, watch videos together in sync, chat in real time, and build
-shared playlists — inspired by [CyTube](https://github.com/calzoneman/sync) but
-rebuilt with a current stack.
+CyTube is a public-URL download portal. Users paste a public YouTube,
+Instagram, Facebook, TikTok, Dailymotion, or Bilibili link, list formats, and
+download video+audio / video only / audio only. Private or login-walled posts
+are out of scope.
+
+A local desktop shell can start the same FastAPI daemon, show the portal in a
+window, and leave the web UI at `http://127.0.0.1:8000` for a browser.
+
+Synchronized rooms, chat, playlist, and auth remain later product directions
+and need their own specs. They are not the current app.
 
 ## Users
 
 | User | Needs |
 | --- | --- |
-| Viewer | Join a channel, watch synced video, chat |
-| Channel owner | Create/manage channels, control playback queue |
-| Guest | Browse public channels without an account (future) |
+| Downloader | Paste a public link, pick a format, download to their device |
+| Local operator | Run the portal on their machine via the desktop app; download in the window or in a browser at the local URL |
 
 ## Boundaries
 
-- **This app** owns the UI and API in **one Cloudflare Worker**. D1 is the
-  system of record. Workers KV holds sessions (and later cache). R2 is reserved
-  for file storage.
-- **Video hosting** is external (YouTube, Vimeo, etc.). This app embeds and
-  syncs playback state; it does not transcode or host video files.
-- **Real-time sync** (WebSocket) is planned but not yet built. Current scaffold
-  is REST + server-rendered pages.
-- **OPFS** (Origin Private File System) for client-side caching/offline is a
-  future direction under evaluation — see open questions. Do not implement
-  without an approved spec.
+- **This app** owns one Python package: Jinja pages, JSON `/api`, yt-dlp extract,
+  temp download jobs. No login cookies.
+- **Local desktop** is a thin shell around that app. It starts and stops uvicorn
+  and shows the same portal. It does not add a second extract/download client.
+- **Video files** are fetched from public hosts and streamed through, then the
+  server temp copy is deleted. This app does not host a video library.
 - The Blueprint is a workflow overlay, not an app generator. Never run a
-  framework scaffolder in this repository. Add Astro/Wrangler files by hand.
+  framework scaffolder in this repository.
 
 ## Stack (committed)
 
-Target after feature 6. The `web/` + `backend/` split is already gone.
-
 | Layer | Tech |
 | --- | --- |
-| App | Astro 6/7 (`output: 'server'`) + `@astrojs/cloudflare` v13+ |
-| API | Hono 4, mounted on the same Worker at `/api` |
-| ORM | Prisma 7 (`prisma-client`, `runtime = "workerd"`) when models exist |
-| Database | Cloudflare D1 (SQLite) |
-| Sessions / cache | Workers KV (`SESSION` + `KV`) |
-| Files | R2 binding `ASSETS` |
-| Package | pnpm 11, **single package at repo root** |
+| App | FastAPI + Jinja2 + Flowbite/Tailwind CDN |
+| JSON API | `app/backend/` at `/api` (inspect, jobs, SSE, file, cancel) |
+| Domain | `app/logic/` (yt-dlp, in-memory jobs) |
+| Desktop shell | pywebview window + spawned `uvicorn app.main:app` (same `app/` package, uv) |
+| Package | uv, **single package at repo root** |
 
 ## Durable engineering direction
 
-- Thin Astro pages in `src/pages/`; reusable UI in `src/components/`.
-- Hono in `src/backend/app.ts`, mounted via Astro `/api` catch-all. Same-origin
-  fetches to `/api/*`.
-- Bindings via `import { env } from "cloudflare:workers"` (not
-  `Astro.locals.runtime`).
-- Prisma schema is the source of truth. D1 SQL in `prisma/migrations/d1/`.
-- UI theme is locked in `prototypes/theme.css`. 6b ports it into the app
-  stylesheet before building pages against the mockups.
+- Compose in `app/main.py`. HTML in `app/web`. JSON in `app/backend`. Domain in
+  `app/logic` (no FastAPI).
+- Desktop code must not call yt-dlp or duplicate inspect/job HTTP.
+- Bind the daemon to `127.0.0.1` only unless a later spec says otherwise.
+- Public hosts only. Pylance uses `.venv`.
 
 ## Phased roadmap (high level)
 
-1. **Same-origin Astro Worker** — collapse Next.js + Hono split; KV; one domain
-2. **Prototype** — done (`prototypes/theme.css`, `home.html`, `room.html`)
-3. **Core room UX** — 6b ports the theme; then player, playlist, chat
-4. **Auth** — user registration, sessions (KV), channel ownership
-5. **Real-time** — WebSocket for playback sync and live chat
-6. **OPFS / offline** — evaluate and spec client-side storage if warranted
+1. **FastAPI portal** — shipped: inspect + concurrent downloads
+2. **Local desktop shell** — daemon + window on the existing portal + exposed URL
+3. **Later** — rooms, chat, playlist, auth, WebSocket, OPFS; each needs a spec
 
 ## Deployment
 
-- Cloudflare Workers via Wrangler 4.
-- Production hostname: `cytube.ishanto.com` (pages + `/api`).
-- Preview: `cytube-dev.ishanto.com` (`pnpm deploy:dev`; own D1/R2/KV).
-- Health: `GET /api/health`.
-- Local: `astro dev` / `wrangler dev` on the Cloudflare workerd runtime.
+- Local uvicorn: `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
+- Local desktop: launch binds `127.0.0.1:8000` (or reuses it if already up),
+  shows that URL, quitting stops a daemon this process started.
+- Not a Cloudflare Worker.
 
 ## Open direction questions
 
 Route these to the user; do not resolve them inside a feature task:
 
-- WebSocket library choice (native WS, Socket.io, PartyKit, Durable Objects)
-- Auth strategy beyond Astro Sessions + KV (OAuth vs password)
-- Whether OPFS is needed for v1 or deferred
-- Guest/anonymous access policy
 - Whether to adopt a test framework, and when
-- Exact cutover of leftover `api.cytube.ishanto.com` DNS if it still points
-  at the old Worker
+- Installer / tray / LAN bind (`0.0.0.0`) for the desktop shell
+- Whether synchronized rooms return, and on what stack

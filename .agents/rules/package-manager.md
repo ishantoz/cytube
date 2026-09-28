@@ -1,18 +1,18 @@
 # Package Manager Rule
 
-Use **pnpm 11** only.
+Use **uv** only for this Python app.
 
-- Lockfile is `pnpm-lock.yaml` and it is authoritative.
-- Do not use npm, yarn, or bun for this project.
-- Translate npm/yarn/bun commands to pnpm.
-- Do not create or commit `package-lock.json`, `yarn.lock`, or `bun.lockb`.
+- Lockfile is `uv.lock` and it is authoritative (`pyproject.toml` lists deps).
+- Do not use pip, poetry, conda, npm, yarn, pnpm, or bun for app dependencies.
+- Translate install commands to `uv add` / `uv sync`.
 
 ```bash
-pnpm install
-pnpm add <package>
-pnpm dev
-pnpm build
-pnpm typecheck
+uv sync
+uv add <package>
+uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+uv run cytube
+uv run python -c "from app.main import app"
 ```
 
 Single package at the repo root. No `web/` or `backend/` workspaces.
+Pylance must resolve packages from `.venv` via `pyrightconfig.json`.

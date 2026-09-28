@@ -1,6 +1,6 @@
 # API Agent
 
-Use for Hono work mounted under Astro `/api`.
+Use for FastAPI `/api` inspect and job routes, yt-dlp extract, and download jobs.
 
 Read:
 
@@ -10,7 +10,8 @@ Read:
 
 Operating rules:
 
-- App is `src/backend/app.ts`. Features live in `src/backend/modules/`.
-- Mount is `src/pages/api/[...path].ts`.
-- Verify with curl against `http://localhost:8787/api/...` and
+- Compose in `app/main.py`. JSON HTTP in `app/backend/` under `/api`. Domain in `app/logic/`.
+- Include `/api` routers before `GET /{platform}`.
+- `logic/` must not import FastAPI.
+- Verify with curl against `http://127.0.0.1:8000/...` and
   `./.agents/check-baseline.sh`.

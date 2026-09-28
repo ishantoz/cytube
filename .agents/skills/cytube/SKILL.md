@@ -1,15 +1,16 @@
 ---
 name: cytube
-description: Route CyTube monorepo work to the smallest relevant canonical rules while preserving web/API boundaries, Prisma conventions, and context-budget constraints.
+description: Route CyTube work to the smallest relevant canonical rules while preserving FastAPI web/logic/backend boundaries, uv conventions, and context-budget constraints.
 ---
 
 # cytube - focused project routing
 
 Start from `AGENTS.md` and the active Context manifest.
 
-- Web UI, pages, components, API client: `web-frontend.md`, `web-agent.md`
-- Hono routes, Prisma, migrations: `api-backend.md`, `api-agent.md`
-- Architecture and monorepo shape: `project-architecture.md`
+- Web UI, templates, JS inspect/download stack: `web-frontend.md`, `web-agent.md`
+- JSON `/api` inspect and jobs: `api-backend.md`, `api-agent.md`
+- Extract/jobs domain: `app/logic/`
+- Architecture: `project-architecture.md`
 - Browser/UI evidence: `browser-evidence.md`
 - Lifecycle and verification: `agent-workflow.md`
 
@@ -18,16 +19,12 @@ active scope and record it in `current-feature.md`.
 
 Always preserve:
 
-- Hono in `src/backend/app.ts`, mounted only via Astro `/api` catch-all
-- New API as `src/backend/modules/<name>/`
-- Prisma: `HealthCheck` probe only; no users/channels until a spec
-- Client import: `src/backend/generated/prisma`, not `@prisma/client`
-- pnpm 11 commands
+- `app/main.py` composes only; `web` / `logic` / `backend` stay separate
+- Public-host allowlists in `app/logic/extractor.py`
+- Temp-dir jobs that stream then delete
+- uv commands (`uv.lock`)
 - `./.agents/check-baseline.sh` as the regression gate
 
 This repo has no test framework yet. The gate is `./.agents/check-baseline.sh`
-(no new tsc/eslint errors), `pnpm build` when build-sensitive, plus recorded
-manual verification. See `agent-workflow.md` and
-`blueprint/context/adoption-baseline.md`.
-
-Look is locked in `prototypes/`. `/feature 6b` ports `theme.css` first.
+(Python compile + import), plus recorded manual verification. See
+`agent-workflow.md` and `blueprint/context/adoption-baseline.md`.

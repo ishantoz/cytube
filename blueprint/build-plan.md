@@ -5,33 +5,30 @@
 
 ## Shipped capability groups
 
-Scaffold completed 2026-09-01. Groups 1–4 were the old Next + `web/`/`backend/`
-split; they were retired when 6a collapsed the repo to one Worker.
+1–6a are leftover Cloudflare Worker history. The live app is the FastAPI
+download portal (JSON inspect/jobs under `/api`, Jinja pages).
 
-1. **Monorepo scaffold** — retired (was pnpm workspaces, `web/` + `backend/`)
-2. **Database** — Prisma 7 + D1; now a `HealthCheck` probe table only
-3. **API** — Hono in the root Worker at `/api` (health only)
-4. **Web shell** — retired Next channel/room UI; Astro stub at `/`
-5. **Agent loop** — Blueprint overlay synced to this project (`/onboard` complete)
-6a. **Root Astro Worker + Hono mount** — Astro SSR, Hono catch-all, D1+R2+KV
+1. **Monorepo scaffold** — retired
+2. **Database** — retired (no D1 in the current app)
+3. **API** — retired Hono Worker; current JSON is FastAPI `/api`
+4. **Web shell** — retired Next/Astro room UI
+5. **Agent loop** — Blueprint overlay (`/onboard` complete)
+6a. **Root Astro Worker + Hono mount** — retired; not the current runtime
 
-## Data models (Prisma)
+## Data models
 
-- `HealthCheck` (`kind`, `checkedAt`) — probe table for `/api/health`
-
-## Seed data
-
-None. `prisma/seed.sql` is a no-op.
+No database. Download jobs are in-memory with a temp directory per job.
 
 ## Active roadmap
 
-Look is locked in `prototypes/` (pre-build, not a `/feature` target). 6b ports
-`prototypes/theme.css` on its first step.
+- [x] 7. Local desktop shell — launching the app starts the FastAPI daemon, opens a window on the existing portal, and shows the local web URL
 
-- [ ] 6. Same-origin Astro on Cloudflare — one root app, Hono at `/api`, Workers KV
-  - [x] 6a. Root Astro Worker + Hono mount — Astro SSR at repo root, Hono at `/api`, D1+R2+KV bindings
-  - [ ] 6b. Astro UI shell — new pages in `src/pages` from `prototypes/` (old Next channel/room UI was removed)
-  - [ ] 6c. KV sessions — Astro Sessions on `SESSION`; app `KV` used for a real read/write
+## Later (former Worker / room product; not the next FastAPI slice)
+
+- [ ] 6. Same-origin Astro on Cloudflare
+  - [x] 6a. Root Astro Worker + Hono mount
+  - [ ] 6b. Astro UI shell
+  - [ ] 6c. KV sessions
   - [ ] 6d. Retire leftover `api.cytube.ishanto.com` if it still serves the Worker
 - [ ] Interactive chat (send messages)
 - [ ] Playlist management (add/remove/reorder)
@@ -42,9 +39,8 @@ Look is locked in `prototypes/` (pre-build, not a `/feature` target). 6b ports
 
 ## Engineering invariants
 
-- pnpm 11 only; `pnpm-lock.yaml` is authoritative
-- Prisma client: `pnpm db:generate` → `src/backend/generated/prisma`
+- uv only; `uv.lock` is authoritative
 - UI talks to `/api` on the same origin
 - Gate on `./.agents/check-baseline.sh` (no new errors) plus manual evidence
 - No test framework yet
-- Do not run `create-cloudflare` / `create astro` in this repo
+- Do not run framework scaffolders in this repo

@@ -4,19 +4,13 @@
 <h1 class="text-2xl font-semibold text-gray-900">{{ label }}</h1>
 <p class="mt-2 text-gray-600">{{ hint }}</p>
 
-<form
-  hx-post="/{{ platform }}/inspect"
-  hx-target="#results"
-  hx-swap="innerHTML"
-  class="mt-6"
->
+<form id="inspect-form" data-platform="{{ platform }}" class="mt-6">
   <label for="url" class="block text-sm font-medium text-gray-900">URL</label>
   <div class="mt-2 flex flex-col sm:flex-row gap-2">
     <input
       type="url"
       name="url"
       id="url"
-      required
       placeholder="{{ placeholder }}"
       class="flex-1 border border-gray-300 text-gray-900 text-sm p-2.5 focus:ring-gray-800 focus:border-gray-800"
     />
@@ -24,8 +18,8 @@
       type="submit"
       class="text-white bg-gray-900 hover:bg-gray-800 text-sm font-medium px-4 py-2.5"
     >
-      <span class="htmx-label">Fetch formats</span>
-      <span class="htmx-indicator">Reading…</span>
+      <span data-idle>Fetch formats</span>
+      <span data-busy class="hidden">Reading…</span>
     </button>
   </div>
 </form>

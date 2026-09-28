@@ -5,3 +5,4 @@ you complete them (step 10 of the workflow). Together they're the project's buil
 history, the record of what was built and why.
 
 - `6a-root-astro-worker.md` — combined Astro Worker + Hono `/api` (2026-09-01)
+- `7-local-desktop-shell.md` — pywebview + local FastAPI daemon (2026-09-29)

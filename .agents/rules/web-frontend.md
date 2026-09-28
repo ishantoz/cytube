@@ -1,27 +1,40 @@
 # Web Frontend Rules
 
-UI is Astro at `src/pages/`.
+UI is Jinja templates under `app/web/templates/` plus `app/web/static/app.js`.
+HTML routes live in `app/web/routes.py`. Inspect and downloads are JSON under `/api`.
 
 ## Structure
 
-- `src/pages/index.astro` — HTML stub
-- New UI pages go in `src/pages/`. Do not rebuild the old Next channel
-  list or `/r/[name]` room unless a spec says so.
+- `app/web/templates/base.html` — header, nav, footer, download stack
+- `app/web/templates/platform.html` — URL form (`#inspect-form`, `data-platform`)
+- `app/web/templates/partials/error.html` — unknown-platform HTML 404
+- `app/web/static/app.js` — inspect fetch + table render; concurrent jobs, SSE, confirm-to-cancel
+- `app/web/routes.py` — `GET /`, `GET /{platform}`
 
 ## Styling
 
-- Tokens: `prototypes/theme.css`. 6b ports them into the app stylesheet.
-- Dark media-room: player primary, playlist and chat secondary.
+- Tailwind CDN (`@tailwindcss/browser@4`) + Flowbite 4 CSS/JS
+- Light published-site look (text header/footer, few icons)
 
 ## Pages
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Astro stub until 6b (see `prototypes/home.html`) |
-| `/api/*` | Hono (not Astro pages) |
+| `/youtube` (and other platform keys) | inspect + download |
+| `/` | redirect to YouTube |
+
+## Inspect and downloads
+
+- Form `fetch`es `POST /api/{platform}/inspect` and renders title/formats in `#results`
+- Empty or invalid inspect shows `{error}` text in `#results` (not an HTML fragment swap)
+- Download buttons `POST /api/{platform}/jobs` then SSE `/api/jobs/{id}/events`
+- Bottom-right stack of concurrent job cards (not a centered overlay)
+- Cancel shows `confirm()` then `POST /api/jobs/{id}/cancel`
+- No HTMX
 
 ## Do not
 
-- Port the deleted Next components (`Header`, `ChannelCard`, `VideoPlayer`,
-  `Playlist`, `Chat`) without a spec
-- Import Prisma into page files
+- Call yt-dlp from `web/`
+- Port Cloudflare Astro/Next room UI into this portal without a spec
+- Import Python extractors from the browser
+- Restore HTMX inspect

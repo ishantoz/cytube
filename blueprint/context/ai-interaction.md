@@ -32,7 +32,7 @@ Every non-trivial work item must state:
 - goal, scope, owned paths, and out-of-scope behavior
 - approved decisions and unresolved questions
 - reviewable steps with observable done-when criteria
-- which package(s) the work touches (`web/`, `backend/`, or both)
+- which package(s) the work touches (`app/` templates, static, or Python modules)
 - endpoint/schema verification for API changes
 - migration/compatibility/recovery plan where relevant
 - the verification matrix: static commands plus the manual path

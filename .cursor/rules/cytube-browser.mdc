@@ -1,6 +1,6 @@
 ---
 description: Browser evidence via Playwright MCP only
-globs: web/**
+globs: app/web/**
 alwaysApply: false
 ---
 
@@ -8,3 +8,4 @@ Read `.agents/rules/browser-evidence.md`.
 
 Use the configured `playwright` MCP server for UI inspection. Never write
 throwaway browser scripts; `.agents/hooks/no-adhoc-browser.py` blocks them.
+Serve the portal at http://127.0.0.1:8000.

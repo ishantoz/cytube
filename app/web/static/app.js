@@ -82,7 +82,7 @@ async function startDownload(button) {
   setProgress(4, "Starting a temporary job on the server…", "");
 
   try {
-    const created = await fetch(`/${platform}/jobs`, {
+    const created = await fetch(`/api/${platform}/jobs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -93,11 +93,11 @@ async function startDownload(button) {
     }
     jobId = body.job_id;
     if (pendingCancel) {
-      fetch(`/jobs/${jobId}/cancel`, { method: "POST" }).catch(() => {});
+      fetch(`/api/jobs/${jobId}/cancel`, { method: "POST" }).catch(() => {});
       return;
     }
 
-    source = new EventSource(`/jobs/${jobId}/events`);
+    source = new EventSource(`/api/jobs/${jobId}/events`);
     source.onmessage = async (event) => {
       const data = JSON.parse(event.data);
       if (settled) return;
@@ -160,7 +160,7 @@ async function startDownload(button) {
     abort.abort();
     if (source) source.close();
     if (jobId) {
-      fetch(`/jobs/${jobId}/cancel`, { method: "POST" }).catch(() => {});
+      fetch(`/api/jobs/${jobId}/cancel`, { method: "POST" }).catch(() => {});
     }
     finishCancelled();
   }
@@ -178,7 +178,7 @@ async function startDownload(button) {
 
   async function streamToDevice(id, filename, size) {
     setProgress(95, "Streaming the temp file to your device…", "");
-    const fileUrl = `/jobs/${id}/file`;
+    const fileUrl = `/api/jobs/${id}/file`;
     const total = Number(size) || 0;
 
     if (!total || total >= 80 * 1024 * 1024) {
@@ -236,3 +236,115 @@ document.addEventListener("click", (event) => {
     startDownload(button);
   }
 });
+
+function setInspectBusy(form, busy) {
+  const idle = form.querySelector("[data-idle]");
+  const waiting = form.querySelector("[data-busy]");
+  const button = form.querySelector("button[type=submit]");
+  if (idle) idle.classList.toggle("hidden", busy);
+  if (waiting) waiting.classList.toggle("hidden", !busy);
+  if (button) button.disabled = busy;
+}
+
+function renderInspectError(message) {
+  return `<p class="text-sm text-red-700" role="alert">${escapeHtml(message)}</p>`;
+}
+
+function downloadButtons(platform, pageUrl, fmt, media) {
+  const url = escapeHtml(pageUrl);
+  const plat = escapeHtml(platform);
+  const id = escapeHtml(fmt.format_id);
+  const quality = escapeHtml(fmt.resolution || "Video");
+  let html = `
+    <button type="button" data-download data-platform="${plat}" data-url="${url}" data-format-id="${id}" data-kind="merged" data-label="${quality} + audio" class="text-gray-900 underline">Video + audio</button>
+    <button type="button" data-download data-platform="${plat}" data-url="${url}" data-format-id="${id}" data-kind="video" data-label="${quality} only" class="text-gray-600 underline">Video only</button>`;
+  if (!media.audio || media.audio.length === 0) {
+    html += `
+    <button type="button" data-download data-platform="${plat}" data-url="${url}" data-format-id="${id}" data-kind="extract_audio" data-label="Extract audio" class="text-gray-600 underline">Audio</button>`;
+  }
+  return html;
+}
+
+function renderInspectResults(platform, pageUrl, media) {
+  const title = escapeHtml(media.title || "video");
+  const meta = [media.uploader, media.duration_label].filter(Boolean).join(" · ");
+  const thumb = media.thumbnail
+    ? `<img src="${escapeHtml(media.thumbnail)}" alt="" referrerpolicy="no-referrer" class="w-full sm:w-48 h-28 object-cover bg-gray-100" />`
+    : "";
+
+  let videoBody = "";
+  if (media.video && media.video.length) {
+    videoBody = media.video.map((fmt) => {
+      const file = [fmt.file_type, fmt.size_label].filter(Boolean).join(" · ");
+      const fps = fmt.fps ? ` <span class="text-gray-500"> ${escapeHtml(String(fmt.fps))} fps</span>` : "";
+      return `<tr class="border-b border-gray-100">
+        <td class="py-3 pr-4 whitespace-nowrap">${escapeHtml(fmt.resolution || "Original")}${fps}</td>
+        <td class="py-3 pr-4 whitespace-nowrap text-gray-600">${escapeHtml(file)}</td>
+        <td class="py-3"><div class="flex flex-wrap gap-x-3 gap-y-1">${downloadButtons(platform, pageUrl, fmt, media)}</div></td>
+      </tr>`;
+    }).join("");
+    videoBody = `<div class="mt-3 overflow-x-auto"><table class="w-full text-sm text-left text-gray-700">
+      <thead class="text-xs uppercase text-gray-500 border-b border-gray-200"><tr>
+        <th class="py-2 pr-4 font-medium">Quality</th><th class="py-2 pr-4 font-medium">File</th><th class="py-2 font-medium">Download</th>
+      </tr></thead><tbody>${videoBody}</tbody></table></div>`;
+  } else {
+    videoBody = `<p class="mt-2 text-sm text-gray-600">No video formats found.</p>`;
+  }
+
+  let audioBody = "";
+  if (media.audio && media.audio.length) {
+    audioBody = media.audio.map((fmt) => {
+      const file = [fmt.file_type, fmt.size_label].filter(Boolean).join(" · ");
+      const bitrate = fmt.bitrate ? `${fmt.bitrate} kbps` : "—";
+      const label = fmt.bitrate ? `${fmt.bitrate} kbps audio` : "Audio";
+      return `<tr class="border-b border-gray-100">
+        <td class="py-3 pr-4 whitespace-nowrap">${escapeHtml(bitrate)}</td>
+        <td class="py-3 pr-4 whitespace-nowrap text-gray-600">${escapeHtml(file)}</td>
+        <td class="py-3"><button type="button" data-download data-platform="${escapeHtml(platform)}" data-url="${escapeHtml(pageUrl)}" data-format-id="${escapeHtml(fmt.format_id)}" data-kind="audio" data-label="${escapeHtml(label)}" class="text-gray-900 underline">Audio only</button></td>
+      </tr>`;
+    }).join("");
+    audioBody = `<div class="mt-3 overflow-x-auto"><table class="w-full text-sm text-left text-gray-700">
+      <thead class="text-xs uppercase text-gray-500 border-b border-gray-200"><tr>
+        <th class="py-2 pr-4 font-medium">Bitrate</th><th class="py-2 pr-4 font-medium">File</th><th class="py-2 font-medium">Download</th>
+      </tr></thead><tbody>${audioBody}</tbody></table></div>`;
+  } else {
+    audioBody = `<p class="mt-2 text-sm text-gray-600">No separate audio tracks. Use Audio on a video row to extract sound.</p>`;
+  }
+
+  return `<article>
+    <div class="flex flex-col sm:flex-row gap-4 pb-6 border-b border-gray-200">${thumb}
+      <div><h2 class="text-lg font-semibold text-gray-900">${title}</h2>
+      <p class="mt-1 text-sm text-gray-600">${escapeHtml(meta)}</p></div>
+    </div>
+    <section class="mt-8"><h3 class="text-base font-semibold text-gray-900">Video</h3>${videoBody}</section>
+    <section class="mt-8"><h3 class="text-base font-semibold text-gray-900">Audio</h3>${audioBody}</section>
+  </article>`;
+}
+
+document.getElementById("inspect-form")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const results = document.getElementById("results");
+  const platform = form.dataset.platform;
+  const url = new FormData(form).get("url") || "";
+  setInspectBusy(form, true);
+  results.innerHTML = "";
+  try {
+    const response = await fetch(`/api/${platform}/inspect`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+    const body = await response.json();
+    if (!response.ok) {
+      results.innerHTML = renderInspectError(body.error || "Could not read that URL.");
+      return;
+    }
+    results.innerHTML = renderInspectResults(platform, body.page_url, body.media);
+  } catch (error) {
+    results.innerHTML = renderInspectError(error.message || "Could not read that URL.");
+  } finally {
+    setInspectBusy(form, false);
+  }
+});
+

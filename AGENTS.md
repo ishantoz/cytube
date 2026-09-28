@@ -6,14 +6,17 @@ read it directly.
 
 ## Scope
 
-- **CyTube** is a synchronized video-room app: users join channels, watch videos
-  together in sync, chat, and manage playlists.
-- **App:** one Cloudflare Worker at the repo root (Astro 7 SSR + Hono at
-  `/api`). Single pnpm package.
-- **Database** — Cloudflare D1. Probe model `HealthCheck` for `/api/health`.
-  Do not import `@prisma/client`; use `src/backend/generated/prisma`.
+- **CyTube** here is a public-URL download portal: paste a YouTube, Instagram,
+  Facebook, TikTok, Dailymotion, or Bilibili link, list formats, download
+  video+audio / video only / audio only. Server fetches with yt-dlp, streams
+  the file, then deletes temp copies. No login cookies.
+- **App:** one Python package at the repo root (`app/`). FastAPI + Jinja2 +
+  Flowbite/Tailwind CDN. JSON inspect/jobs under `/api`; the page consumes them in JS.
 - The **AI Blueprint** is a workflow overlay, not an app generator. Never run a
   framework scaffolder inside this repository.
+- The old Cloudflare Worker / Astro / Hono / D1 stack is **not** the current
+  app. Do not restore it without a spec. Installed Cloudflare skills in
+  `skills-lock.json` are leftover; do not apply Wrangler/Workers rules here.
 
 ## Minimal session bootstrap
 
@@ -46,41 +49,35 @@ Playwright launcher (`.agents/playwright-mcp.sh`), and `.claude/skills` /
 
 ## Commands
 
-- Package manager: **pnpm 11** only (`pnpm-lock.yaml` is authoritative)
-- Install: `pnpm install`
-- Combined Worker (Astro + Hono): `pnpm dev` (workerd :8787)
-- Local D1: `pnpm db:migrate` / remote prod: `pnpm db:migrate:remote` / remote dev: `pnpm db:migrate:remote:dev`
-- Prisma Studio (local D1 snapshot): `pnpm db:studio`
-- Deploy: `pnpm deploy` (local bindings) / `pnpm deploy:dev` (`cytube-dev.ishanto.com`) / `pnpm deploy:production` (`cytube.ishanto.com`)
-- Typecheck: `pnpm typecheck`
+- Package manager: **uv** only (`uv.lock` and `pyproject.toml` are authoritative)
+- Install: `uv sync`
+- Dev server: `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
+- Desktop: `uv run cytube`
+- Typecheck / import smoke: `uv run python -c "from app.main import app"`
 - **Regression gate: `./.agents/check-baseline.sh`**
-- Build: `pnpm build` / `pnpm build:app` (both run `astro build`)
 - Do not edit `.env` files.
 
 ## Architecture invariants
 
-### Combined Worker
+### FastAPI portal (`app/`)
 
-- Astro pages in `src/pages/` stay thin. Hono is `src/backend/app.ts`.
-- Backend features are modules under `src/backend/modules/`.
-- Mount Hono with Astro catch-all `src/pages/api/[...path].ts`.
-- Bindings via root `wrangler.jsonc` (D1, R2 `ASSETS`, KV `SESSION`/`KV`,
-  static `STATIC`). Production hostname is `cytube.ishanto.com`. Preview is
-  `cytube-dev.ishanto.com` (`--env dev`).
+- `app/main.py` — compose FastAPI, mount `/static`, include routers
+- `app/desktop.py` — pywebview window; starts or reuses uvicorn on `127.0.0.1:8000`
+- `app/web/` — Jinja templates, static JS, HTML pages (`GET /{platform}`)
+- `app/logic/` — platform allowlists, yt-dlp extract, download jobs (no FastAPI)
+- `app/backend/` — JSON inspect, jobs, SSE, file stream, cancel (mounted at `/api`)
+- Include `/api` routers before `GET /{platform}`
+- Public hosts only (see `PLATFORMS` in `app/logic/extractor.py`)
 
-### Prisma husk (`prisma/`)
+### Downloads
 
-- Probe model `HealthCheck` for `/api/health`. D1 `0001_init.sql` is a no-op;
-  `0002_health_checks.sql` creates the table.
-- Do not restore users/channels/playlist/chat until a spec asks.
-- Prisma client: `pnpm db:generate` → `src/backend/generated/prisma`.
+- Process in a temp folder, stream to the client, then delete
+- Concurrent jobs; UI is a bottom-right progress stack with confirm-to-cancel
 
 ### Cross-cutting
 
-- Real-time sync (WebSocket) is planned but not yet implemented. Do not add a
-  second HTTP client stack or duplicate state libraries without a spec decision.
-- OPFS client storage is a future direction; do not implement without an
-  approved spec.
+- Do not add a second HTTP client stack or a Worker/Astro app without a spec.
+- Do not restore users/channels/playlist/chat until a spec asks.
 
 ## Engineering quality gate
 
@@ -98,8 +95,7 @@ The gate is **no new errors**:
 ./.agents/check-baseline.sh    # must exit 0
 ```
 
-It runs root typecheck and compares per-file error counts against
-`blueprint/context/adoption-baseline.md`.
+It compile-checks `app/` and imports `app.main`.
 
 Every behavior-changing step also records manual evidence:
 
@@ -125,9 +121,6 @@ Use one file-backed work item at a time:
 
 Canonical skills live under `.agents/skills/<name>/SKILL.md`.
 
-**Next planned step:** `/feature` 6b (Astro UI from `prototypes/`; do not
-port the removed Next channel/room UI).
-
 ## Browser evidence
 
 Use the configured `playwright` MCP server for UI inspection. Never write a
@@ -140,3 +133,4 @@ blocks it. Details in `.agents/rules/browser-evidence.md`.
 - Do not edit `.env` or secrets.
 - Do not use destructive git commands without explicit approval.
 - Every implementation includes a docs/rules impact check.
+- Pylance/Pyright must use `.venv` (`pyrightconfig.json` / `[tool.pyright]`).

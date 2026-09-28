@@ -1,55 +1,55 @@
 # CyTube Architecture
 
-Synchronized video-room app on one Cloudflare Worker: Astro pages + Hono at
-`/api`. Single pnpm package at the repo root.
+Public-URL download portal: FastAPI + Jinja2, one Python package at
+the repo root.
 
 ## Repository shape
 
 ```
 cytube/
-├── src/
-│   ├── backend/
-│   │   ├── app.ts                Hono app
-│   │   └── modules/health/       first module (service, routes, …)
-│   └── pages/
-│       ├── index.astro          HTML stub
-│       └── api/[...path].ts      catch-all Hono mount
-├── prisma/                       D1 schema + migrations
-├── prototypes/                  locked look (theme + mockups)
-├── wrangler.jsonc
+├── app/
+│   ├── desktop.py           pywebview + uvicorn child
+│   ├── main.py              compose FastAPI, static, routers
+│   ├── web/                 templates, static, HTML pages
+│   ├── logic/               extract + jobs (no FastAPI)
+│   └── backend/             JSON inspect, jobs, SSE, file, cancel
+├── pyproject.toml
+├── uv.lock
 ├── AGENTS.md
 └── blueprint/
 ```
 
 ## Stack
 
-- **App:** Astro 7 + `@astrojs/cloudflare` + Hono 4
-- **DB:** Cloudflare D1 (`HealthCheck` probe table)
-- **Storage:** R2 `ASSETS`, KV `SESSION` + `KV`
-- **Package:** pnpm 11, one package
+- **App:** FastAPI, Jinja2, Flowbite/Tailwind CDN
+- **Desktop:** pywebview window on the existing pages (`uv run cytube`)
+- **Client:** `app/web/static/app.js` consumes `/api`
+- **Extract/download:** yt-dlp (+ curl-cffi Firefox impersonate for some hosts)
+- **Package:** uv  (`uv.lock`)
 
 ## Ports
 
 | Service | Port | Command |
 | --- | --- | --- |
-| Combined Worker | 8787 | `pnpm dev` |
+| Download portal | 8000 | `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload` or `uv run cytube` |
 
 ## Invariants
 
-- Backend logic lives in `src/backend/modules/<name>/`.
-- Mount Hono only through Astro `src/pages/api/[...path].ts`.
-- Bindings via `import { env } from "cloudflare:workers"` / Hono `c.env`.
-- Do not run `prisma generate` until a feature needs the client. Import from
-  `src/backend/generated/prisma`, not `@prisma/client`.
-- Real-time sync is **not built yet**. Do not add WebSocket code without a spec.
+- `logic/` does not import FastAPI. `web/` does not call yt-dlp. `backend/` does not render Jinja.
+- HTML in `app/web/templates/`, behavior in `app/web/static/app.js`.
+- Platform allowlists live in `app/logic/extractor.py`.
+- Job lifecycle lives in `app/logic/jobs.py`.
+- Include `/api` routers before `GET /{platform}`.
+- Desktop `app/desktop.py` does not call yt-dlp. Quit stops a daemon this process started; it does not kill a reused server.
+- Public URLs only — no cookie/login-walled extraction without a spec.
+- Daemon bind is `127.0.0.1` only unless a later spec says otherwise.
 
 ## Planned (not built)
 
-- 6b Astro UI from `prototypes/` (do not port deleted Next UI)
-- KV sessions (6c)
-- Chat, playlist, playback, auth, WebSocket, OPFS
+- Synchronized video rooms, chat, playlist, auth, WebSocket, OPFS — later,
+  behind their own specs. Do not mix that architecture into this portal
+  without an approved spec.
 
 ## Deployment
 
-Cloudflare Worker `cytube-api` on `cytube.ishanto.com`. Preview Worker
-`cytube-dev` on `cytube-dev.ishanto.com` (own D1/R2/KV).
+Local uvicorn on :8000. No Wrangler deploy for this app.

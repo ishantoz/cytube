@@ -34,9 +34,8 @@ Do not work around a block: fix the approach.
 Playwright MCP restricts file system access to workspace roots and blocks
 `file://` navigation by default. Serve over HTTP instead:
 
-- `pnpm dev` — web at http://localhost:3000, API at http://localhost:3001
-- Requires Postgres: `pnpm db:up` before testing data-dependent pages
-- Demo channel: http://localhost:3000/r/lobby
+- `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
+  — download portal at http://127.0.0.1:8000
 
 Reuse a running server; do not start a duplicate.
 
@@ -49,7 +48,7 @@ Describe the signed-in state, not the credential.
 
 1. Say plainly that Playwright MCP is not available.
 2. Prefer non-browser evidence: `./.agents/check-baseline.sh`, or curl against
-   `http://localhost:3001`.
+   `http://127.0.0.1:8000`.
 3. State which path you used.
 
 ## Reporting

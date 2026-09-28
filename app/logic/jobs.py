@@ -10,7 +10,7 @@ from typing import Any
 
 import yt_dlp
 
-from app.extractor import ydl_download_options
+from app.logic.extractor import ydl_download_options
 
 
 def format_speed(speed: float | None) -> str | None:

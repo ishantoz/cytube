@@ -21,9 +21,10 @@ options = {
 
 def main() -> None:
     urls = [
-        "https://www.facebook.com/...",
-        "https://www.facebook.com/...",
-        "https://www.facebook.com/...",
+        # TODO: Add URLs here
+        # Example: "https://www.facebook.com/..."
+        # Example: "https://www.facebook.com/..."
+        # Example: "https://www.facebook.com/..."
     ]
 
     with yt_dlp.YoutubeDL(options) as ydl:

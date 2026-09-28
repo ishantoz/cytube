@@ -6,11 +6,11 @@ Read only the files routed by `AGENTS.md` or an active work item's
 
 | File | Use For |
 | --- | --- |
-| `project-architecture.md` | Monorepo shape, packages, ports, invariants |
-| `web-frontend.md` | Next.js pages, components, API client, styling |
-| `api-backend.md` | Hono routes, Prisma 7, migrations, API conventions |
+| `project-architecture.md` | FastAPI portal shape, ports, invariants |
+| `web-frontend.md` | Jinja templates, JS inspect, download stack |
+| `api-backend.md` | FastAPI routes, yt-dlp, jobs |
 | `browser-evidence.md` | Playwright MCP; no hand-rolled browser scripts |
-| `package-manager.md` | pnpm 11 workspace rules |
+| `package-manager.md` | uv / `uv.lock` |
 | `agent-workflow.md` | Agent workflow, verification gate, Blueprint loop |
 | `knowledgebase-maintenance.md` | Docs/rules impact check |
 
@@ -22,5 +22,6 @@ Read only the files routed by `AGENTS.md` or an active work item's
 | Skills | `.agents/skills/` | `.cursor/skills` (symlink) | `.claude/skills` (symlink) |
 | Shell hook | `.agents/hooks/no-adhoc-browser.py` | `.cursor/hooks.json` | `.claude/settings.json` |
 | Playwright MCP | `.agents/playwright-mcp.sh` | `.cursor/mcp.json` | — |
+| Python analysis | `pyrightconfig.json` + `[tool.pyright]` | Pylance uses `.venv` | same |
 
 When a canonical rule changes, update any affected thin adapter.

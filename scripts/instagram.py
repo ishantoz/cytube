@@ -25,10 +25,12 @@ options = {
 
 def main() -> None:
     urls = [
-        "https://www.instagram.com/reel/DaAgT5_Qu-X/",
-        "https://www.instagram.com/reels/DdtVfT9yxRT/",
-        "https://www.instagram.com/reel/DdtV4p4SoCb/",
-        "https://www.instagram.com/reel/DdtWLFQSQbZ/",
+        # TODO: Add URLs here
+        # Example: "https://www.instagram.com/..."
+        # Example: "https://www.instagram.com/..."
+        # Example: "https://www.instagram.com/..."
+        # Example: "https://www.instagram.com/..."
+        # Example: "https://www.instagram.com/..."
     ]
 
     with yt_dlp.YoutubeDL(options) as ydl:

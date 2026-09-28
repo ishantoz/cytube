@@ -11,8 +11,8 @@
 ## During Work
 
 - Make the smallest correct change.
-- Keep pages thin; logic in components, lib, or route modules.
-- Use pnpm only.
+- Keep templates thin; domain in `app/logic/`, JSON HTTP in `app/backend/`, client in `app/web/static/app.js`.
+- Use uv only.
 - Do not edit `.env` or secrets.
 - Do not run destructive git commands without explicit approval.
 - After spec approval, execute listed steps without per-step prompts while the
@@ -30,8 +30,7 @@
 Static, before any step is checked:
 
 ```bash
-./.agents/check-baseline.sh   # tsc + lint for web and backend
-pnpm build                    # build-sensitive changes only
+./.agents/check-baseline.sh   # python compile + import
 ```
 
 The repo starts **green** at onboarding. The gate is "no NEW errors against

@@ -61,3 +61,13 @@ downloads/
 downloads/
 
 prototypes/
+
+run.ts
+
+.agents/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
