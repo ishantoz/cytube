@@ -5,10 +5,9 @@ the active scope and follow nearby code where it is more specific.
 
 ## Scope and commands
 
-- **App:** FastAPI (`app/main.py` composes `app/web`, `app/logic`, `app/backend`; desktop in `app/desktop.py`).
+- **App:** FastAPI (`app/main.py` composes `app/web`, `app/logic`, `app/backend`).
 - Use **uv** only. `uv.lock` is authoritative.
 - Dev: `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`.
-- Desktop: `uv run cytube` (starts or reuses `127.0.0.1:8000`, window title includes that URL).
 - Regression gate: `./.agents/check-baseline.sh`
 - Do not edit `.env` or commit secret values.
 - Point the IDE at `.venv` (`pyrightconfig.json` / `[tool.pyright]`).

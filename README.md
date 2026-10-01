@@ -36,22 +36,14 @@ cd cytube
 uv sync
 ```
 
-Desktop (starts the local server and opens a window):
-
-```bash
-uv run cytube
-```
-
-The same UI is also a normal website on your machine:
-
-```text
-http://127.0.0.1:8000
-```
-
-Browser-only (no window):
+Open the site in your browser:
 
 ```bash
 uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+```text
+http://127.0.0.1:8000
 ```
 
 Public links only. Private, login-walled, or DRM-protected media is out of
@@ -109,7 +101,7 @@ UI is built around.
 - You have to use a **package manager or zip** for your OS; it is not in this repo
 - FFmpeg’s own license (often **GPL** for full builds) is separate from this
   project and from yt-dlp
-- `PATH` must be visible to the same terminal (or desktop app) that runs CyTube.
+- `PATH` must be visible to the same terminal that runs uvicorn.
   A PATH change in another window does not count
 - You are responsible for getting a build that matches your CPU (Intel vs Apple
   Silicon, x64 vs ARM)
@@ -174,7 +166,6 @@ you redistribute CyTube or ship a binary.
 | [Uvicorn](https://github.com/Kludex/uvicorn) | ASGI server | BSD-3-Clause |
 | [Jinja2](https://github.com/pallets/jinja) | HTML templates | BSD-3-Clause |
 | [python-multipart](https://github.com/Kludex/python-multipart) | Form bodies | Apache-2.0 |
-| [pywebview](https://github.com/r0x0r/pywebview) | Desktop window | BSD-3-Clause |
 
 The page also loads **Tailwind CSS** and **Flowbite** from a CDN. Those
 projects have their own licenses and terms.

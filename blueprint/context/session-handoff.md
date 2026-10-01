@@ -2,9 +2,9 @@
 
 > Replaceable snapshot of the active work item.
 
-- Updated: 2026-09-29
+- Updated: 2026-10-02
 - Work item: none
 - Status: idle
-- Branch: `main` (after complete merge)
+- Branch: `fix/web-only` (not merged)
 - Blocker: none
-- Exact next action: `/feature`, `/fix`, or `/rollback`
+- Exact next action: say yes to squash-merge into `main`, or `/feature`, `/fix`, `/rollback`

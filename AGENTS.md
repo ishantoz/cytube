@@ -52,7 +52,6 @@ Playwright launcher (`.agents/playwright-mcp.sh`), and `.claude/skills` /
 - Package manager: **uv** only (`uv.lock` and `pyproject.toml` are authoritative)
 - Install: `uv sync`
 - Dev server: `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
-- Desktop: `uv run cytube`
 - Typecheck / import smoke: `uv run python -c "from app.main import app"`
 - **Regression gate: `./.agents/check-baseline.sh`**
 - Do not edit `.env` files.
@@ -62,7 +61,6 @@ Playwright launcher (`.agents/playwright-mcp.sh`), and `.claude/skills` /
 ### FastAPI portal (`app/`)
 
 - `app/main.py` — compose FastAPI, mount `/static`, include routers
-- `app/desktop.py` — pywebview window; starts or reuses uvicorn on `127.0.0.1:8000`
 - `app/web/` — Jinja templates, static JS, HTML pages (`GET /{platform}`)
 - `app/logic/` — platform allowlists, yt-dlp extract, download jobs (no FastAPI)
 - `app/backend/` — JSON inspect, jobs, SSE, file stream, cancel (mounted at `/api`)
